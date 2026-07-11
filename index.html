@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>✨ Golden AI SearchBox · Top 100 Terms</title>
+  <!-- Google Font & minimal reset -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(145deg, #0b0e14 0%, #141a24 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
+
+    .golden-card {
+      max-width: 1000px;
+      width: 100%;
+      background: rgba(22, 28, 40, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 3.5rem;
+      padding: 2.5rem 2.2rem 3rem;
+      box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 215, 0, 0.15);
+      transition: box-shadow 0.3s ease;
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .golden-card:hover {
+      box-shadow: 0 30px 60px -12px #000000cc, 0 0 0 2px rgba(255, 215, 0, 0.3);
+    }
+
+    h1 {
+      font-size: 2.6rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #f9e281, #f7c948, #dba42b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 0.6rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .subhead {
+      color: #aab3c9;
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0.3px;
+      margin-bottom: 2rem;
+      border-left: 4px solid #f7c948;
+      padding-left: 1rem;
+      opacity: 0.9;
+    }
+
+    /* ----- golden search box ----- */
+    .search-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: #1e2636;
+      border-radius: 80px;
+      padding: 0.2rem 0.2rem 0.2rem 1.8rem;
+      border: 1px solid #3b445a;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 0 0 1px rgba(255, 215, 0, 0.1);
+      transition: all 0.25s ease;
+    }
+
+    .search-wrapper:focus-within {
+      border-color: #f7c948;
+      box-shadow: 0 0 0 4px rgba(247, 201, 72, 0.2), inset 0 2px 8px #000000;
+      background: #1b2332;
+    }
+
+    .search-icon {
+      color: #f7c948;
+      font-size: 1.3rem;
+      margin-right: 0.6rem;
+      opacity: 0.8;
+    }
+
+    #searchInput {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 1rem 0.5rem 1rem 0;
+      font-size: 1.2rem;
+      font-weight: 400;
+      color: #f0f3fa;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.2px;
+    }
+
+    #searchInput::placeholder {
+      color: #6b768e;
+      font-weight: 300;
+      letter-spacing: 0.2px;
+    }
+
+    #clearBtn {
+      background: transparent;
+      border: none;
+      color: #8e99b3;
+      font-size: 1.6rem;
+      line-height: 1;
+      padding: 0 1.2rem 0 0.6rem;
+      cursor: pointer;
+      transition: color 0.2s;
+      display: none;
+      font-weight: 300;
+    }
+
+    #clearBtn:hover {
+      color: #f7c948;
+    }
+
+    .search-wrapper:focus-within #clearBtn {
+      display: block;
+    }
+
+    /* ----- results counter / meta ----- */
+    .result-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 1.5rem 0.4rem 0.8rem 0.4rem;
+      color: #9aa4be;
+      font-size: 0.9rem;
+      letter-spacing: 0.2px;
+      border-bottom: 1px dashed #2e384b;
+      padding-bottom: 0.6rem;
+    }
+
+    #resultCount {
+      background: #1e2638;
+      padding: 0.2rem 1rem;
+      border-radius: 30px;
+      font-weight: 500;
+      color: #e8d59b;
+      border: 1px solid #3e485e;
+      font-size: 0.8rem;
+    }
+
+    /* ----- term grid (cards) ----- */
+    #termGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.2rem;
+      margin-top: 0.8rem;
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: 0.4rem;
+      scrollbar-width: thin;
+      scrollbar-color: #f7c948 #202838;
+    }
+
+    #termGrid::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #termGrid::-webkit-scrollbar-track {
+      background: #202838;
+      border-radius: 20px;
+    }
+
+    #termGrid::-webkit-scrollbar-thumb {
+      background: #f7c948;
+      border-radius: 20px;
+    }
+
+    .term-card {
+      background: #1a212f;
+      border-radius: 28px;
+      padding: 1.2rem 1.2rem 1.2rem 1.4rem;
+      border-left: 6px solid #f7c948;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s ease;
+      cursor: default;
+      backdrop-filter: blur(4px);
+      border: 1px solid #2f3a4e;
+      border-left-width: 6px;
+    }
+
+    .term-card:hover {
+      transform: translateY(-3px);
+      background: #1f283b;
+      border-color: #f7d46a;
+      box-shadow: 0 12px 24px -8px #000000aa;
+    }
+
+    .term-name {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #f7e9c4;
+      letter-spacing: -0.2px;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .term-name span {
+      background: #f7c948;
+      color: #0b0f17;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.1rem 0.6rem;
+      border-radius: 30px;
+      letter-spacing: 0.3px;
+    }
+
+    .term-def {
+      color: #c8d0e3;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      opacity: 0.9;
+      margin-top: 0.2rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .no-result {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 2.5rem 0;
+      color: #8f99b5;
+      font-size: 1.1rem;
+      background: #141c28;
+      border-radius: 60px;
+      border: 1px dashed #3b455d;
+    }
+
+    /* small badge */
+    .gold-badge {
+      background: #f7c94820;
+      border-radius: 60px;
+      padding: 0.2rem 1rem;
+      border: 1px solid #f7c94840;
+      color: #f7dba4;
+    }
+
+    /* responsive */
+    @media (max-width: 600px) {
+      .golden-card {
+        padding: 1.8rem 1.2rem;
+        border-radius: 2.5rem;
+      }
+      h1 {
+        font-size: 2rem;
+      }
+      #searchInput {
+        font-size: 1rem;
+        padding: 0.8rem 0.2rem;
+      }
+      .search-wrapper {
+        padding-left: 1rem;
+      }
+      #termGrid {
+        grid-template-columns: 1fr;
+        max-height: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="golden-card" role="main">
+  <h1>🔍 Golden SearchBox</h1>
+  <div class="subhead">✦ Top 100 AI terms · definitions &amp; context</div>
+
+  <!-- search -->
+  <div class="search-wrapper">
+    <span class="search-icon">✦</span>
+    <input type="text" id="searchInput" placeholder="Search any AI term... (e.g. Transformer, LLM)" aria-label="Search AI terms" autofocus />
+    <button id="clearBtn" aria-label="Clear search">✕</button>
+  </div>
+
+  <!-- meta -->
+  <div class="result-meta">
+    <span id="resultCount">100 terms</span>
+    <span class="gold-badge">✨ curated</span>
+  </div>
+
+  <!-- grid -->
+  <div id="termGrid"></div>
+</div>
+
+<script>
+  (function() {
+    // ---------- TOP 100 AI TERMS (name + definition) ----------
+    const TERMS = [
+      { term: "Artificial Intelligence", definition: "The simulation of human intelligence processes by machines, especially computer systems. Includes learning, reasoning, and self-correction." },
+      { term: "Machine Learning", definition: "A subset of AI that enables systems to learn and improve from experience without explicit programming. Uses algorithms to parse data, learn, and predict." },
+      { term: "Deep Learning", definition: "A machine learning technique that teaches computers to do what comes naturally to humans: learn by example. Uses neural networks with many layers." },
+      { term: "Neural Network", definition: "A computing system inspired by biological neural networks. Consists of interconnected nodes (neurons) that process information using connectionist approaches." },
+      { term: "Natural Language Processing", definition: "Branch of AI that helps computers understand, interpret, and manipulate human language. Powers chatbots, translators, sentiment analysis." },
+      { term: "Computer Vision", definition: "Field of AI that trains computers to interpret and understand the visual world. Used in image recognition, object detection, and facial recognition." },
+      { term: "Robotics", definition: "Interdisciplinary branch of AI and engineering that deals with design, construction, operation, and use of robots. Often combines perception and action." },
+      { term: "Expert System", definition: "An AI program that uses a knowledge base and inference rules to solve complex problems that typically require human expertise." },
+      { term: "Fuzzy Logic", definition: "A form of many-valued logic that handles approximate reasoning, where truth values range between 0 and 1. Used in control systems." },
+      { term: "Reinforcement Learning", definition: "A type of machine learning where an agent learns to make decisions by performing actions and receiving rewards or penalties in an environment." },
+      { term: "Supervised Learning", definition: "ML method where models are trained on labeled data; the algorithm learns to map input to output based on example input-output pairs." },
+      { term: "Unsupervised Learning", definition: "ML method where models find patterns in unlabeled data. No correct answers are given; the system discovers hidden structures." },
+      { term: "Semi-supervised Learning", definition: "Combines a small amount of labeled data with a large amount of unlabeled data during training. Improves accuracy when labeling is expensive." },
+      { term: "Self-supervised Learning", definition: "A learning paradigm where the system generates its own supervisory signals from the data, often used in representation learning." },
+      { term: "Transfer Learning", definition: "A technique where knowledge gained from one task is used to improve performance on a different but related task." },
+      { term: "Generative Adversarial Network", definition: "A GAN consists of two neural networks (generator and discriminator) that compete to generate new, synthetic instances that can pass for real data." },
+      { term: "Variational Autoencoder", definition: "A generative model that learns a latent representation of data and can generate new data points by sampling from the learned distribution." },
+      { term: "Transformer", definition: "A deep learning model architecture that relies on self-attention mechanisms, widely used in NLP and the basis for models like BERT and GPT." },
+      { term: "BERT", definition: "Bidirectional Encoder Representations from Transformers. A pre-trained NLP model that captures context from both directions, improving understanding." },
+      { term: "GPT", definition: "Generative Pre-trained Transformer. A family of autoregressive language models that generate coherent text based on prompts. (e.g., ChatGPT)." },
+      { term: "LLM", definition: "Large Language Model. A type of AI model trained on vast amounts of text to understand and generate human-like text, often with billions of parameters." },
+      { term: "AGI", definition: "Artificial General Intelligence. A hypothetical AI system that matches or exceeds human cognitive abilities across all domains." },
+      { term: "ASI", definition: "Artificial Superintelligence. An intellect that surpasses the brightest human minds in every field, including creativity, general wisdom, and problem-solving." },
+      { term: "Turing Test", definition: "A test of a machine's ability to exhibit intelligent behavior indistinguishable from that of a human. Proposed by Alan Turing." },
+      { term: "Chatbot", definition: "An AI program designed to simulate conversation with human users, especially over the internet. Often powered by NLP and LLMs." },
+      { term: "Intelligent Agent", definition: "An entity that perceives its environment, reasons, and takes actions to achieve goals. Can be software-based or robotic." },
+      { term: "Knowledge Representation", definition: "The field of AI concerned with how to formally represent information in a form that a computer system can use to solve complex tasks." },
+      { term: "Inference Engine", definition: "A component of an expert system that applies logical rules to the knowledge base to deduce new information or make decisions." },
+      { term: "Decision Tree", definition: "A tree-like model of decisions and their possible consequences, used in machine learning for classification and regression." },
+      { term: "Random Forest", definition: "An ensemble learning method that constructs many decision trees during training and outputs the class that is the mode of the classes." },
+      { term: "Support Vector Machine", definition: "A supervised ML model used for classification and regression. Finds the hyperplane that best separates classes in high-dimensional space." },
+      { term: "K-means Clustering", definition: "An unsupervised algorithm that partitions data into K distinct clusters based on similarity. Each data point belongs to the cluster with the nearest mean." },
+      { term: "PCA", definition: "Principal Component Analysis. A dimensionality reduction technique that transforms data into a new coordinate system, maximizing variance." },
+      { term: "t-SNE", definition: "t-Distributed Stochastic Neighbor Embedding. A non-linear dimensionality reduction technique used for visualizing high-dimensional data." },
+      { term: "Autoencoder", definition: "A type of artificial neural network used to learn efficient representations (encoding) of data, typically for dimensionality reduction or feature learning." },
+      { term: "Attention Mechanism", definition: "A technique in deep learning that allows models to dynamically focus on specific parts of the input, improving performance on long sequences." },
+      { term: "Self-attention", definition: "An attention mechanism where a sequence is related to itself to compute a representation; key component of the Transformer architecture." },
+      { term: "Fine-tuning", definition: "The process of taking a pre-trained model and further training it on a smaller, specific dataset to adapt it to a particular task." },
+      { term: "Zero-shot Learning", definition: "A model's ability to recognize or perform tasks for which it has not seen any training examples, using auxiliary information." },
+      { term: "Few-shot Learning", definition: "Learning from only a few training examples. The model generalizes from a small number of labeled data points." },
+      { term: "One-shot Learning", definition: "A type of few-shot learning where only one example of each class is given for training." },
+      { term: "Multimodal AI", definition: "AI systems that can process and integrate multiple types of data, such as text, images, audio, and video, for richer understanding." },
+      { term: "Embedding", definition: "A learned representation of data (e.g., words, images) as dense vectors in a continuous space, capturing semantic meaning." },
+      { term: "Word2Vec", definition: "A popular technique for generating word embeddings, representing words as vectors in a continuous space based on context." },
+      { term: "GloVe", definition: "Global Vectors for Word Representation. An unsupervised learning algorithm for obtaining vector representations for words." },
+      { term: "RNN", definition: "Recurrent Neural Network. A class of neural networks where connections form a directed cycle, allowing them to handle sequential data." },
+      { term: "LSTM", definition: "Long Short-Term Memory. A type of RNN architecture designed to capture long-term dependencies and avoid vanishing gradients." },
+      { term: "GRU", definition: "Gated Recurrent Unit. A simplified version of LSTM with fewer gates, used in sequence modeling." },
+      { term: "CNN", definition: "Convolutional Neural Network. A neural network architecture designed for processing grid-like data, such as images, using convolutional layers." },
+      { term: "GAN", definition: "Generative Adversarial Network. (see Generative Adversarial Network)." },
+      { term: "Diffusion Model", definition: "A generative model that learns to generate data by reversing a diffusion process (adding noise). Used in image generation." },
+      { term: "VQ-VAE", definition: "Vector Quantized Variational Autoencoder. A generative model that combines autoencoders with discrete latent representations." },
+      { term: "AI Ethics", definition: "The field of study that examines the moral and societal implications of AI, including bias, fairness, transparency, and accountability." },
+      { term: "Bias in AI", definition: "Systematic errors in AI models that produce unfair outcomes, often reflecting historical or societal biases in the training data." },
+      { term: "Explainable AI", definition: "AI systems designed to be interpretable and transparent, allowing humans to understand how decisions are made." },
+      { term: "Federated Learning", definition: "A distributed ML approach that trains algorithms across multiple decentralized devices holding local data, without exchanging it." },
+      { term: "Edge AI", definition: "The deployment of AI models on edge devices (smartphones, IoT sensors) to perform computations locally, reducing latency." },
+      { term: "Cloud AI", definition: "AI services and infrastructure provided via cloud computing, enabling scalable model training and deployment." },
+      { term: "AI Accelerator", definition: "Specialized hardware (e.g., GPU, TPU) designed to speed up AI computations, especially deep learning." },
+      { term: "TPU", definition: "Tensor Processing Unit. A custom ASIC developed by Google for accelerating tensor operations in neural networks." },
+      { term: "GPU", definition: "Graphics Processing Unit. Originally for rendering graphics, now widely used for parallel computations in AI training." },
+      { term: "Prompt Engineering", definition: "The practice of designing and refining prompts to effectively guide language models to produce desired outputs." },
+      { term: "Hallucination", definition: "In AI, a confident response generated by a model that is factually incorrect or nonsensical, often in LLMs." },
+      { term: "AI Agent", definition: "An autonomous entity that perceives its environment and acts to achieve goals, often using planning and learning." },
+      { term: "Multi-agent System", definition: "A system consisting of multiple interacting intelligent agents, often used to solve problems that are difficult for a single agent." },
+      { term: "Swarm Intelligence", definition: "Collective behavior of decentralized, self-organized systems, inspired by natural swarms (e.g., ant colonies, bird flocks)." },
+      { term: "Evolutionary Algorithm", definition: "A population-based optimization algorithm inspired by biological evolution, using mutation, crossover, and selection." },
+      { term: "Genetic Algorithm", definition: "A specific type of evolutionary algorithm that uses techniques inspired by natural evolution, like selection, crossover, and mutation." },
+      { term: "Bayesian Network", definition: "A probabilistic graphical model that represents a set of variables and their conditional dependencies via a directed acyclic graph." },
+      { term: "Markov Decision Process", definition: "A mathematical framework for modeling decision-making in stochastic environments, used in reinforcement learning." },
+      { term: "Q-learning", definition: "A model-free reinforcement learning algorithm that learns the value of an action in a particular state to maximize reward." },
+      { term: "DQN", definition: "Deep Q-Network. A reinforcement learning algorithm that combines Q-learning with deep neural networks to handle high-dimensional state spaces." },
+      { term: "Actor-Critic", definition: "A hybrid reinforcement learning method that uses two architectures: an actor (policy) and a critic (value function)." },
+      { term: "MCTS", definition: "Monte Carlo Tree Search. A heuristic search algorithm used in decision-making, famously used in AlphaGo." },
+      { term: "AlphaGo", definition: "An AI program developed by DeepMind that defeated a world champion Go player using deep reinforcement learning and MCTS." },
+      { term: "AlphaFold", definition: "An AI system developed by DeepMind that predicts protein structures with remarkable accuracy, revolutionizing biology." },
+      { term: "OpenAI", definition: "An AI research organization focused on developing safe and beneficial AGI. Known for GPT, DALL-E, and ChatGPT." },
+      { term: "DeepMind", definition: "A British AI research lab acquired by Google, known for AlphaGo, AlphaFold, and reinforcement learning breakthroughs." },
+      { term: "Hugging Face", definition: "A company and community platform that provides open-source libraries (Transformers) and tools for NLP and AI." },
+      { term: "TensorFlow", definition: "An open-source machine learning framework developed by Google, widely used for deep learning and production." },
+      { term: "PyTorch", definition: "An open-source deep learning framework developed by Meta, known for dynamic computation graphs and ease of use." },
+      { term: "Keras", definition: "A high-level neural network API written in Python, running on top of TensorFlow, designed for fast experimentation." },
+      { term: "JAX", definition: "A Python library for high-performance numerical computing, especially machine learning, with automatic differentiation." },
+      { term: "ONNX", definition: "Open Neural Network Exchange. An open format built to represent machine learning models, enabling interoperability between frameworks." },
+      { term: "MLOps", definition: "A set of practices that combines machine learning, DevOps, and data engineering to streamline the deployment and monitoring of ML models." },
+      { term: "Data Augmentation", definition: "Techniques used to increase the diversity of training data by applying transformations (e.g., rotation, cropping) to create modified copies." },
+      { term: "Regularization", definition: "Techniques used to prevent overfitting in ML models by adding constraints or penalties, e.g., L1/L2 regularization, dropout." },
+      { term: "Dropout", definition: "A regularization technique where randomly selected neurons are ignored during training, reducing co-adaptation and improving generalization." },
+      { term: "Batch Normalization", definition: "A technique to improve training speed and stability by normalizing the inputs of each layer, reducing internal covariate shift." },
+      { term: "Activation Function", definition: "A mathematical function applied to a neuron's output, introducing non-linearity (e.g., ReLU, sigmoid, tanh)." },
+      { term: "ReLU", definition: "Rectified Linear Unit. An activation function defined as f(x)=max(0,x), widely used for its simplicity and effectiveness." },
+      { term: "Sigmoid", definition: "An activation function that squashes input to a value between 0 and 1, often used for binary classification." },
+      { term: "Softmax", definition: "An activation function that converts logits into probabilities that sum to 1, commonly used for multi-class classification." },
+      { term: "Loss Function", definition: "A function that measures how far a model's predictions are from the true labels, used to optimize the model (e.g., cross-entropy, MSE)." },
+      { term: "Cross-entropy", definition: "A loss function commonly used in classification tasks, measuring the difference between two probability distributions." },
+      { term: "MSE", definition: "Mean Squared Error. A loss function used for regression tasks, calculating the average squared difference between predictions and targets." },
+      { term: "Gradient Descent", definition: "An optimization algorithm used to minimize the loss function by iteratively moving in the direction of the negative gradient." },
+      { term: "Stochastic Gradient Descent", definition: "A variant of gradient descent where the gradient is computed using a single or a few random samples, improving speed and convergence." },
+      { term: "Adam", definition: "Adaptive Moment Estimation. An optimization algorithm that combines momentum and RMSprop, widely used in deep learning." },
+      { term: "Learning Rate", definition: "A hyperparameter that controls how much to adjust the model weights in response to the estimated error during training." },
+      { term: "Epoch", definition: "One complete pass of the entire training dataset through the ML algorithm during training." },
+      { term: "Batch Size", definition: "The number of training examples used in one forward/backward pass. A hyperparameter of gradient descent." },
+      { term: "Overfitting", definition: "When a model learns the training data too well, including noise, but performs poorly on unseen data." },
+      { term: "Underfitting", definition: "When a model is too simple to capture the underlying patterns in the data, resulting in poor performance on both training and test data." }
+    ];
+
+    // DOM refs
+    const inputEl = document.getElementById('searchInput');
+    const gridEl = document.getElementById('termGrid');
+    const countEl = document.getElementById('resultCount');
+    const clearBtn = document.getElementById('clearBtn');
+
+    // render function
+    function render(filter = '') {
+      const query = filter.trim().toLowerCase();
+      let filtered = TERMS;
+
+      if (query.length > 0) {
+        filtered = TERMS.filter(item =>
+          item.term.toLowerCase().includes(query) ||
+          item.definition.toLowerCase().includes(query)
+        );
+      }
+
+      // update count
+      countEl.textContent = `${filtered.length} term${filtered.length !== 1 ? 's' : ''}`;
+
+      if (filtered.length === 0) {
+        gridEl.innerHTML = `<div class="no-result">✨ No terms found · try adjusting your search</div>`;
+        return;
+      }
+
+      // build cards
+      const html = filtered.map(item => `
+        <div class="term-card">
+          <div class="term-name">
+            ${item.term}
+            <span>AI</span>
+          </div>
+          <div class="term-def">${item.definition}</div>
+        </div>
+      `).join('');
+
+      gridEl.innerHTML = html;
+    }
+
+    // ----- event listeners -----
+    function handleSearch() {
+      const val = inputEl.value;
+      render(val);
+      // show/hide clear button
+      clearBtn.style.display = val.length > 0 ? 'block' : 'none';
+    }
+
+    inputEl.addEventListener('input', handleSearch);
+
+    clearBtn.addEventListener('click', function() {
+      inputEl.value = '';
+      render('');
+      clearBtn.style.display = 'none';
+      inputEl.focus();
+    });
+
+    // initial render
+    render();
+
+    // optional: focus on load
+    window.addEventListener('load', () => {
+      inputEl.focus();
+    });
+  })();
+</script>
+</body>
+</html>
